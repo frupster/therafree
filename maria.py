@@ -174,6 +174,20 @@ class Maria:
              ["It sounds like you're going through a tough time. Please recognize that this is abuse. You can reach out to the National Domestic Violence Hotline at 1-800-799-7233 for help."])
         ]
 
+        # Emotion-to-noun map for building possessive phrases
+        self.emotion_nouns = {
+            "angry": "anger", "mad": "anger", "furious": "anger",
+            "irritated": "irritation", "frustrated": "frustration", "upset": "upset",
+            "sad": "sadness", "depressed": "depression", "unhappy": "unhappiness",
+            "down": "feelings", "blue": "sadness", "cry": "crying",
+            "crying": "crying", "cried": "crying",
+            "anxious": "anxiety", "anxiety": "anxiety",
+            "stressed": "stress", "stress": "stress",
+            "worried": "worry", "scared": "fear",
+            "happy": "happiness", "joyful": "joy", "content": "contentment",
+            "pleased": "pleasure", "excited": "excitement", "glad": "gladness"
+        }
+
         # grammar aware pronoun switches
         def pronoun_reflection(phrase):
             words = phrase.split()
@@ -182,13 +196,10 @@ class Maria:
 
             for w in words:
                 key = w.lower()
-                # keep third person pronouns alone
                 if key in ["he", "she", "they"]:
                     reflected_words.append(w)
-                # switch first/second person pronouns
                 elif key in self.pronouns:
                     reflected_word = self.pronouns[key]
-                    # fix simple "am/is/are" grammar
                     if reflected_word in ["are", "am", "is"] and prev_word in ["I", "you", "he", "she", "they"]:
                         if reflected_word == "am" and prev_word == "you":
                             reflected_word = "are"
@@ -199,36 +210,82 @@ class Maria:
                     reflected_words.append(w)
                 prev_word = reflected_words[-1]
 
-            # fix possessive pronouns for third person
-            i = 0
-            while i < len(reflected_words) - 2:
-                if reflected_words[i].lower() in ["he", "she", "they"]:
-                    if reflected_words[i+1].lower() == "is":
-                        adj = reflected_words[i+2].lower()
-                        possessive = ""
-                        new_word = adj
-
-                        # determine possessive form
-                        if reflected_words[i].lower() == "he":
-                            possessive = "his"
-                        elif reflected_words[i].lower() == "she":
-                            possessive = "her"
-                        else:
-                            possessive = "their"
-
-                        # convert adjective to noun if necessary
-                        if adj == "angry":
-                            new_word = "anger"
-                        elif adj == "sad":
-                            new_word = "sadness"
-                        elif adj == "happy":
-                            new_word = "happiness"
-
-                        # replace the adjective with possessive + noun
-                        reflected_words[i+2] = possessive + " " + new_word
-                i += 1
-
             return ' '.join(reflected_words)
+
+        # Detect who the sentence is about: "you", "he", "she", "they", or default "you"
+        def detect_subject(user_input):
+            first_word = user_input.strip().split()[0].lower() if user_input.strip() else ""
+            if first_word in ["he", "him", "his"]:
+                return "he"
+            elif first_word in ["she", "her", "hers"]:
+                return "she"
+            elif first_word in ["they", "them", "their"]:
+                return "they"
+            else:
+                return "you"
+
+        # Build possessive + noun phrase based on subject
+        # e.g. subject="he", emotion="angry" -> "his anger"
+        # e.g. subject="you", emotion="angry" -> "your anger"
+        def emotion_phrase(subject, emotion):
+            noun = self.emotion_nouns.get(emotion, emotion)
+            possessives = {
+                "you": "your",
+                "he": "his",
+                "she": "her",
+                "they": "their"
+            }
+            return possessives[subject] + " " + noun
+
+        # Build subject-aware responses for word-spotting patterns
+        # Templates use {subject}, {possessive_emotion}, {emotion}
+        def build_emotion_response(user_input, emotion, templates):
+            subject = detect_subject(user_input)
+            poss_emotion = emotion_phrase(subject, emotion)
+
+            # object form: "you" stays "you", but he->him, she->her, they->them
+            object_map = {"you": "you", "he": "him", "she": "her", "they": "them"}
+            object_word = object_map[subject]
+
+            # subject + verb: "you are feeling", "he is feeling", etc.
+            verb_map = {"you": "are", "he": "is", "she": "is", "they": "are"}
+            subject_verb = subject + " " + verb_map[subject]
+
+            # Pick a random template and fill in placeholders
+            template = random.choice(templates)
+            return template.format(
+                subject=subject_verb,
+                object=object_word,
+                possessive_emotion=poss_emotion,
+                emotion=emotion
+            )
+
+        # Word-spotting templates (use {subject}, {possessive_emotion}, {emotion})
+        self.emotion_patterns = [
+            # Sadness
+            (r'\b(sad|depressed|unhappy|down|blue|cry|crying|cried)\b',
+             ["I'm sorry {subject} feeling that way.",
+              "What do you think is causing {possessive_emotion}?",
+              "Would you like to talk about what's making {object} feel this way?"]),
+
+            # Anger
+            (r'\b(angry|mad|furious|irritated|frustrated|upset)\b',
+             ["What is making {object} feel {emotion}?",
+              "How do you usually deal with {possessive_emotion}?",
+              "Do you think {possessive_emotion} is justified?"]),
+
+            # Anxiety / stress
+            (r'\b(anxious|anxiety|stressed|stress|worried|scared)\b',
+             ["What usually triggers {possessive_emotion}?",
+              "How do you cope when {subject} feeling that way?",
+              "Has {possessive_emotion} been affecting daily life?"]),
+
+            # Happiness
+            (r'\b(happy|joyful|content|pleased|excited|glad)\b',
+             ["That's great to hear! What is making {object} feel {emotion}?",
+              "How do you usually celebrate {possessive_emotion}?",
+              "Would you like to share more about what's bringing {object} joy?"])
+        ]
 
         def respond(user_input):
             # Check redirections first (crisis situations)
@@ -238,6 +295,13 @@ class Maria:
                     response = random.choice(responses)
                     captured = [pronoun_reflection(match.group(i + 1)) for i in range(len(match.groups()))]
                     return response.format(*captured)
+
+            # Check emotion patterns (subject-aware)
+            for pattern, templates in self.emotion_patterns:
+                match = re.search(pattern, user_input, re.IGNORECASE)
+                if match:
+                    emotion = match.group(1).lower()
+                    return build_emotion_response(user_input, emotion, templates)
 
             # Check regular patterns
             for pattern, responses in self.patterns:
