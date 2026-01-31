@@ -8,24 +8,20 @@
     <style>
         body {
             margin: 0;
-            height: 100vh;
             background-color: rgb(238, 177, 226);
             font-family: Arial, Helvetica, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
+            
         }
 
         h1 {
-            text-align: center;
+            text-align: center; 
             font-size: 100px;
             color: rgb(198, 98, 207);
-            margin-top: 0px;
-        }
-
-        .image {
-            float: left;
-            
+            margin: 0px;
+            text-shadow: 2px 2px 2px #000000;  
         }
 
         /* Centered chat container */
@@ -33,9 +29,9 @@
             width: 400px;
             height: 600px;
             background: white;
-            margin-top: 20px;
+            margin-top: 0px;
             border-radius: 20px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
         }
@@ -111,21 +107,14 @@
         .layout{
             display: flex;
             align-items: center;
-            gap: 40px;
+            gap: 200px;
         }
 
         .side-image{
-            width: 1000px;
+            width: 300px;
             height: auto;
         }
 
-        .left-img {
-            align-self: center;
-        }
-
-        .right-img {
-            align-self: center;
-        }
 
 
     </style>
@@ -137,8 +126,9 @@
 
  
     <div class="layout">
-        <img src="clear vines.png" class="side-image right-img">
-        
+        <img src="clear vines2.png" class="side-image">
+
+
         <div class="chat-container">
             <!-- Chat messages appear here -->
             <div id="chat"></div>
@@ -146,11 +136,16 @@
             <!-- Input form -->
             <form id="chat-form">
                 <input type="text" id="username" placeholder="Tell me anything..." required>
-                <button type="submit">-></button>
+                <button type="submit">→</button>
             </form>
         </div>
-        <img src="clear vines.png" class="side-image right-img">
+                
+        <img src="clear vines.png" class="side-image">
     </div>
+
+    <footer> 
+        <a href="https://findahelpline.com/countries/us"> Help Resources</a>
+    </footer>
 
 
 
