@@ -13,6 +13,10 @@ bot = Maria()
 def index():
     return send_from_directory(BASE_DIR, "index.html")
 
+@app.route("/<path:filename>")
+def static_files(filename):
+    return send_from_directory(BASE_DIR, filename)
+
 @app.route("/chat", methods=["POST"])
 def chat():
     user_input = request.json["message"]
