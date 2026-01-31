@@ -36,22 +36,29 @@
 
         /* Chat messages area */
         #chat {
-            flex: 1;
-            overflow-y: auto;
-            padding: 15px;
-            background: #fdf0fa;
-            border-radius: 20px 20px 0 0;
-        }
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;   
+        overflow-y: auto;
+        padding: 15px;
+        background: #fdf0fa;
+        border-radius: 20px 20px 0 0;
+    }
+
 
         /* Message bubble */
         .user-message {
-            background: #ffd6f0;
-            padding: 10px 15px;
-            margin: 8px 0;
-            border-radius: 15px;
-            width: fit-content;
-            max-width: 80%;
-        }
+        background: #ffd6f0;
+        padding: 10px 15px;
+        margin: 8px 0;
+        border-radius: 15px;
+        max-width: 70%;
+
+        /* THIS IS THE MAGIC */
+        margin-left: auto;
+}
+
 
         /* Input form */
         form {
