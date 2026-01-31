@@ -215,9 +215,9 @@ class Maria:
         # Detect who the sentence is about: "you", "he", "she", "they", or default "you"
         def detect_subject(user_input):
             first_word = user_input.strip().split()[0].lower() if user_input.strip() else ""
-            if first_word in ["he", "him", "his"]:
+            if first_word in ["he", "him", "his", "dad", "father", "brother", "son", "boyfriend"]:
                 return "he"
-            elif first_word in ["she", "her", "hers"]:
+            elif first_word in ["she", "her", "hers", "mom", "mother", "sister", "daughter", "girlfriend"]:
                 return "she"
             elif first_word in ["they", "them", "their"]:
                 return "they"
@@ -244,11 +244,11 @@ class Maria:
             poss_emotion = emotion_phrase(subject, emotion)
 
             # object form: "you" stays "you", but he->him, she->her, they->them
-            object_map = {"you": "you", "he": "him", "she": "her", "they": "them"}
+            object_map = {"you": "you", "he": "him", "she": "her", "they": "them", "dad": "him", "father": "him", "brother": "him", "son": "him", "boyfriend": "him", "mom": "her", "mother": "her", "sister": "her", "daughter": "her", "girlfriend": "her"}
             object_word = object_map[subject]
 
             # subject + verb: "you are feeling", "he is feeling", etc.
-            verb_map = {"you": "are", "he": "is", "she": "is", "they": "are"}
+            verb_map = {"you": "are", "he": "is", "she": "is", "they": "are", "dad": "is", "father": "is", "brother": "is", "son": "is", "boyfriend": "is", "mom": "is", "mother": "is", "sister": "is", "daughter": "is", "girlfriend": "is"}
             subject_verb = subject + " " + verb_map[subject]
 
             # Pick a random template and fill in placeholders
